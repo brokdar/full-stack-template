@@ -1,0 +1,69 @@
+name: API Fuzz (Schemathesis)
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/api-fuzz.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      ENVIRONMENT: test
+      POSTGRES__HOST: localhost
+      POSTGRES__PORT: "5433"
+      POSTGRES__USER: postgres
+      POSTGRES__PASSWORD: test
+      POSTGRES__DB: app_test
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Start test database
+        run: docker compose -f docker-compose.test.yml up -d --wait db-test
+
+      - name: Run migrations
+        run: uv run alembic upgrade head
+
+      - name: Start API
+        run: |
+          uv run fastapi run app/main.py --port 8000 &
+          timeout 30 bash -c 'until curl -sf http://localhost:8000/health; do sleep 1; done'
+
+      - name: Fuzz the API from its OpenAPI schema
+        # negative_data_rejection is excluded by design: FastAPI ignores
+        # unknown query parameters, which that check treats as a failure.
+        run: >
+          uvx schemathesis run http://localhost:8000/openapi.json
+          --max-examples 100
+          --exclude-checks negative_data_rejection
+          --report junit
+          --report-dir schemathesis-report
+
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: schemathesis-report
+          path: backend/schemathesis-report
+          retention-days: 7

@@ -37,6 +37,7 @@
         "@vitest/coverage-v8": "^4.1.10",
         "jsdom": "^30.0.1",
         "msw": "^2.15.0",
+        "openapi-msw": "^2.0.0",
         "openapi-typescript": "^7.13.0",
         "tailwindcss": "^4",
         "typescript": "^5.9",
@@ -894,6 +895,8 @@
     "open": ["open@11.0.0", "", { "dependencies": { "default-browser": "^5.4.0", "define-lazy-prop": "^3.0.0", "is-in-ssh": "^1.0.0", "is-inside-container": "^1.0.0", "powershell-utils": "^0.1.0", "wsl-utils": "^0.3.0" } }, "sha512-smsWv2LzFjP03xmvFoJ331ss6h+jixfA4UUV/Bsiyuu4YJPfN+FIQGOIiv4w9/+MoHkfkJ22UIaQWRVFRfH6Vw=="],
 
     "openapi-fetch": ["openapi-fetch@0.17.0", "", { "dependencies": { "openapi-typescript-helpers": "^0.1.0" } }, "sha512-PsbZR1wAPcG91eEthKhN+Zn92FMHxv+/faECIwjXdxfTODGSGegYv0sc1Olz+HYPvKOuoXfp+0pA2XVt2cI0Ig=="],
+
+    "openapi-msw": ["openapi-msw@2.0.0", "", { "peerDependencies": { "msw": "^2.10.5" } }, "sha512-FXALpJ5uVGB9P+TmgbuIedPLTWEBxAi6uMvmkkWl5+lSldOBeJZNVZbfYlSw+xBbP2jFm16MKZfGvBHLFm4VNg=="],
 
     "openapi-react-query": ["openapi-react-query@0.5.4", "", { "dependencies": { "openapi-typescript-helpers": "^0.1.0" }, "peerDependencies": { "@tanstack/react-query": "^5.80.0", "openapi-fetch": "^0.17.0" } }, "sha512-V9lRiozjHot19/BYSgXYoyznDxDJQhEBSdi26+SJ0UqjMANLQhkni4XG+Z7e3Ag7X46ZLMrL9VxYkghU3QvbWg=="],
 

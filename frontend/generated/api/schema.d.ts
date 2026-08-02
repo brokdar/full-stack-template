@@ -80,6 +80,18 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /**
+     * ErrorDetail
+     * @description Error response body, as produced by the AppError handler.
+     *
+     *     Reference it in endpoint ``responses={...}`` declarations so error
+     *     statuses are part of the OpenAPI contract (and the generated frontend
+     *     types).
+     */
+    ErrorDetail: {
+      /** Detail */
+      detail: string;
+    };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
@@ -131,12 +143,15 @@ export interface components {
     /**
      * ItemUpdate
      * @description Payload for partially updating an item.
+     *
+     *     Omitted fields are left unchanged; ``description`` may be set to null to
+     *     clear it, but ``name`` is non-nullable.
      */
     ItemUpdate: {
       /** Description */
       description?: string | null;
       /** Name */
-      name?: string | null;
+      name?: string;
     };
     /** Page[ItemRead] */
     Page_ItemRead_: {
@@ -225,6 +240,24 @@ export interface operations {
           "application/json": components["schemas"]["ItemRead"];
         };
       };
+      /** @description Malformed body */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description Name already taken */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
       /** @description Validation Error */
       422: {
         headers: {
@@ -256,6 +289,15 @@ export interface operations {
           "application/json": components["schemas"]["ItemRead"];
         };
       };
+      /** @description Item not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
       /** @description Validation Error */
       422: {
         headers: {
@@ -284,6 +326,15 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Item not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
       };
       /** @description Validation Error */
       422: {
@@ -318,6 +369,33 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ItemRead"];
+        };
+      };
+      /** @description Malformed body */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description Item not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description Name already taken */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
         };
       };
       /** @description Validation Error */

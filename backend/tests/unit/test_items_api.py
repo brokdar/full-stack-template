@@ -78,6 +78,71 @@ async def test_update_rename_to_taken_name_conflicts(client: AsyncClient) -> Non
     assert response.status_code == 409
 
 
+# The next four tests pin down edge cases originally found by Schemathesis
+# fuzzing — keep them: they guard 500s at the validation boundary.
+
+
+async def test_update_with_explicit_null_name_is_rejected(
+    client: AsyncClient,
+) -> None:
+    created = await _create(client)
+
+    response = await client.patch(f"{ITEMS}/{created['id']}", json={"name": None})
+
+    assert response.status_code == 422
+
+
+async def test_update_with_explicit_null_description_clears_it(
+    client: AsyncClient,
+) -> None:
+    created = await _create(client)
+
+    response = await client.patch(
+        f"{ITEMS}/{created['id']}", json={"description": None}
+    )
+
+    assert response.status_code == 200
+    assert response.json()["description"] is None
+
+
+async def test_nul_bytes_in_name_are_rejected(client: AsyncClient) -> None:
+    response = await client.post(ITEMS, json={"name": "bad\x00name"})
+
+    assert response.status_code == 422
+
+
+async def test_lone_surrogates_get_422_not_crash(client: AsyncClient) -> None:
+    # Pydantic rejects the lone surrogate, but the default 422 handler would
+    # then CRASH serializing the error (it echoes the bad input back). Our
+    # sanitizing handler must return a well-formed 422.
+    response = await client.post(
+        ITEMS,
+        content=b'{"name": "\\udbdd"}',
+        headers={"content-type": "application/json"},
+    )
+
+    assert response.status_code == 422
+    assert response.json()["detail"]  # response body itself is valid JSON
+
+
+async def test_truly_malformed_body_returns_documented_400(
+    client: AsyncClient,
+) -> None:
+    response = await client.post(
+        ITEMS,
+        content=b"\x0f\xff\xfe not json",
+        headers={"content-type": "application/json"},
+    )
+
+    assert response.status_code == 400
+
+
+async def test_huge_offset_is_rejected_not_500(client: AsyncClient) -> None:
+    response = await client.get(ITEMS, params={"offset": 36656796423090853642240})
+
+    assert response.status_code == 422
+
+
 async def test_delete_removes_item(client: AsyncClient) -> None:
     created = await _create(client)
 

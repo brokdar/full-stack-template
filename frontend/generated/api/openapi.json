@@ -1,6 +1,18 @@
 {
   "components": {
     "schemas": {
+      "ErrorDetail": {
+        "description": "Error response body, as produced by the AppError handler.\n\nReference it in endpoint ``responses={...}`` declarations so error\nstatuses are part of the OpenAPI contract (and the generated frontend\ntypes).",
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          }
+        },
+        "required": ["detail"],
+        "title": "ErrorDetail",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -33,6 +45,7 @@
             "anyOf": [
               {
                 "maxLength": 2000,
+                "pattern": "^[^\\x00]*$",
                 "type": "string"
               },
               {
@@ -44,6 +57,7 @@
           "name": {
             "maxLength": 255,
             "minLength": 1,
+            "pattern": "^[^\\x00]*$",
             "title": "Name",
             "type": "string"
           }
@@ -91,12 +105,13 @@
         "type": "object"
       },
       "ItemUpdate": {
-        "description": "Payload for partially updating an item.",
+        "description": "Payload for partially updating an item.\n\nOmitted fields are left unchanged; ``description`` may be set to null to\nclear it, but ``name`` is non-nullable.",
         "properties": {
           "description": {
             "anyOf": [
               {
                 "maxLength": 2000,
+                "pattern": "^[^\\x00]*$",
                 "type": "string"
               },
               {
@@ -106,17 +121,11 @@
             "title": "Description"
           },
           "name": {
-            "anyOf": [
-              {
-                "maxLength": 255,
-                "minLength": 1,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": "^[^\\x00]*$",
+            "title": "Name",
+            "type": "string"
           }
         },
         "title": "ItemUpdate",
@@ -203,6 +212,7 @@
             "required": false,
             "schema": {
               "default": 0,
+              "maximum": 2147483647,
               "minimum": 0,
               "title": "Offset",
               "type": "integer"
@@ -270,6 +280,26 @@
             },
             "description": "Successful Response"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            },
+            "description": "Malformed body"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            },
+            "description": "Name already taken"
+          },
           "422": {
             "content": {
               "application/json": {
@@ -304,6 +334,16 @@
         "responses": {
           "204": {
             "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            },
+            "description": "Item not found"
           },
           "422": {
             "content": {
@@ -344,6 +384,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            },
+            "description": "Item not found"
           },
           "422": {
             "content": {
@@ -394,6 +444,36 @@
               }
             },
             "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            },
+            "description": "Malformed body"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            },
+            "description": "Item not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            },
+            "description": "Name already taken"
           },
           "422": {
             "content": {

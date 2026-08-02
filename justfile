@@ -58,9 +58,14 @@ test:
 test-int:
 	bash scripts/run-integration-tests.sh
 
-# Run Playwright end-to-end tests
+# Run Playwright end-to-end tests (UI-only, no backend needed)
 e2e:
 	cd frontend && bun run test:e2e
+
+# Boot the full Docker stack and run the @fullstack smoke suite against it
+smoke:
+	docker compose up --build --wait db redis api worker frontend
+	cd frontend && E2E_FULLSTACK=1 bun run test:e2e
 
 # Everything CI runs, locally
 check: lint typecheck test

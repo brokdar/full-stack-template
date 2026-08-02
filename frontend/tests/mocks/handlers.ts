@@ -1,11 +1,20 @@
-import { HttpResponse, http } from "msw";
+import { createOpenApiHttp } from "openapi-msw";
 
-const API = "http://localhost:8000/api/v1";
+import type { paths } from "@/generated/api/schema";
+
+/**
+ * Typed MSW handlers: paths, params, and response bodies are all inferred
+ * from the generated OpenAPI types, so a backend contract change that isn't
+ * reflected here becomes a type-check failure instead of silent mock drift.
+ */
+export const http = createOpenApiHttp<paths>({
+  baseUrl: "http://localhost:8000",
+});
 
 /** Default happy-path handlers. Override per-test with server.use(...). */
 export const handlers = [
-  http.get(`${API}/items`, () =>
-    HttpResponse.json({
+  http.get("/api/v1/items", ({ response }) =>
+    response(200).json({
       items: [
         {
           id: "0198c5b6-0000-7000-8000-000000000001",

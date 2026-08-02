@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.pool import NullPool
 
 from app.core.config import get_settings
 
@@ -27,7 +28,11 @@ def get_engine() -> AsyncEngine:
     """Return the lazily-created process-wide engine."""
     global _engine  # noqa: PLW0603
     if _engine is None:
-        _engine = create_async_engine(get_settings().postgres.async_url)
+        settings = get_settings()
+        # In tests every pytest test runs in its own event loop; pooled
+        # asyncpg connections must not outlive the loop they were created on.
+        pool_kwargs = {"poolclass": NullPool} if settings.environment == "test" else {}
+        _engine = create_async_engine(settings.postgres.async_url, **pool_kwargs)
     return _engine
 
 

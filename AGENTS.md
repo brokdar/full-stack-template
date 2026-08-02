@@ -40,7 +40,27 @@ typed API contract.
 - **Frontend**: client components use `$api.useQuery/useMutation` from
   `lib/api/client.ts`. Unit tests mock the network with MSW
   (`tests/mocks/handlers.ts`), never the client module.
-- **Tests**: backend unit tests run against in-memory SQLite (no services
-  needed); anything needing real Postgres goes in `backend/tests/integration/`.
 - **Migrations**: every model change ships with an Alembic migration in the
-  same PR.
+  same PR. Integration tests build the schema via `alembic upgrade head` and
+  run `alembic check` — model/migration drift fails CI.
+
+## Testing strategy (write tests at the cheapest layer that catches the bug)
+
+1. **Backend API tests** (`tests/unit/`, in-memory SQLite, no services):
+   the default home for backend logic — test through HTTP, not internals.
+2. **Backend integration** (`tests/integration/`, real Postgres via
+   `just test-int`): dialect-specific behavior (JSONB, arrays, upserts,
+   constraints) and the migration chain.
+3. **Frontend component tests** (Vitest + MSW): mock the network with the
+   TYPED handlers in `tests/mocks/handlers.ts` (openapi-msw) — never mock
+   `lib/api/client.ts`. Untyped responses only via `http.untyped` for
+   infra-failure simulation.
+4. **UI e2e** (`frontend/e2e/*.spec.ts`, no backend): user flows against a
+   production build with the API mocked/absent.
+5. **Full-stack smoke** (`@fullstack` tests, `just smoke`): wiring only —
+   CORS, env baking, Docker networking, migrations-on-boot. Keep under ~5
+   tests; if a smoke failure could have been caught lower, add the
+   lower-layer test instead of growing this suite.
+6. **Schemathesis** (CI): fuzzes the API from the OpenAPI schema. When it
+   finds something, fix it AND pin the case as a unit test (see the
+   "found by Schemathesis" tests in `test_items_api.py`).

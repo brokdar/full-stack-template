@@ -16,6 +16,7 @@ $COMPOSE up -d --wait db-test
 echo "Running integration tests..."
 (
   cd "$REPO_ROOT/backend" &&
+    ENVIRONMENT=test \
     POSTGRES__HOST=localhost \
     POSTGRES__PORT=5433 \
     POSTGRES__USER=postgres \

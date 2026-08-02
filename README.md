@@ -54,8 +54,9 @@ just dev-web           # Next.js dev server     → http://localhost:3000
 
 ```bash
 just check        # lint + typecheck + unit tests (what CI runs)
-just test-int     # backend integration tests against a real Postgres
-just e2e          # Playwright end-to-end tests
+just test-int     # backend integration tests + migration checks (real Postgres)
+just e2e          # Playwright UI tests (no backend needed)
+just smoke        # full Docker stack + @fullstack wiring smoke tests
 just db-revision "add widgets table"   # autogenerate a migration
 just db-upgrade   # apply migrations
 just api-sync     # regenerate frontend API types from the backend OpenAPI schema
