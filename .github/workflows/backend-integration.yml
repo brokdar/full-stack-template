@@ -1,0 +1,33 @@
+name: Backend Integration Tests
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - "scripts/run-integration-tests.sh"
+      - ".github/workflows/backend-integration.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v8
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Install dependencies
+        run: uv sync --frozen
+        working-directory: backend
+
+      - name: Run integration tests
+        run: bash scripts/run-integration-tests.sh

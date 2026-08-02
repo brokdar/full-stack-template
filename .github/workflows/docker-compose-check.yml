@@ -1,0 +1,46 @@
+name: Docker Compose Check
+
+on:
+  pull_request:
+    paths:
+      - "docker-compose.yml"
+      - "backend/Dockerfile"
+      - "frontend/Dockerfile"
+      - ".env.example"
+      - ".github/workflows/docker-compose-check.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Create .env from example
+        run: |
+          cp .env.example .env
+          sed -i 's/^POSTGRES__PASSWORD=.*/POSTGRES__PASSWORD=ci-test/' .env
+          sed -i 's/^AUTH__JWT__SECRET_KEY=.*/AUTH__JWT__SECRET_KEY=ci-test-secret-key-32-characters!/' .env
+
+      - name: Validate compose config
+        run: docker compose config --quiet
+
+      - name: Build and start the stack
+        run: docker compose up --build --wait db redis api worker
+
+      - name: Check API health
+        run: curl --fail --retry 5 --retry-delay 3 http://localhost:8000/health
+
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v

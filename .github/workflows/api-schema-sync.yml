@@ -1,0 +1,41 @@
+name: API Schema Sync
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - "frontend/generated/**"
+      - "scripts/generate-api-types.sh"
+      - "scripts/check-api-schema-sync.sh"
+      - ".github/workflows/api-schema-sync.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v8
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install backend dependencies
+        run: uv sync --frozen
+        working-directory: backend
+
+      - name: Install frontend dependencies
+        run: bun install --frozen-lockfile
+        working-directory: frontend
+
+      - name: Check generated API types are in sync
+        run: bash scripts/check-api-schema-sync.sh
