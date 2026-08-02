@@ -21,7 +21,7 @@
 | Backend | Python 3.13, FastAPI, SQLAlchemy 2 (async), Alembic, ARQ, structlog |
 | Backend tooling | uv, ruff, pyrefly, pytest (+xdist), prek |
 | Frontend | Next.js 16 (App Router, Turbopack), React 19, TypeScript 5, Tailwind 4, shadcn/ui |
-| Frontend tooling | bun, Biome, Vitest, Testing Library, MSW, Playwright |
+| Frontend tooling | bun, Biome, TypeScript 7 (native), Vitest, Testing Library, MSW, Playwright |
 | Contract | FastAPI OpenAPI → openapi-typescript → openapi-fetch (drift blocked in CI + hooks) |
 | Infra | Docker Compose (Postgres, Redis, API, worker, web), devcontainer, GitHub Actions |
 <!-- template-only:end -->
@@ -64,6 +64,19 @@ just api-sync     # regenerate frontend API types from the backend OpenAPI schem
 Git hooks are managed by [prek](https://prek.j178.dev/) (installed by the
 devcontainer, or run `prek install -t pre-commit -t pre-push` once): cheap
 checks run on commit, type checking and unit tests run on push.
+
+## Releases
+
+Push a semver tag to publish both Docker images to GHCR:
+
+```bash
+git tag v1.0.0 && git push --tags
+# → ghcr.io/<owner>/<repo>/api:1.0.0 and ghcr.io/<owner>/<repo>/frontend:1.0.0
+```
+
+Set `NEXT_PUBLIC_API_BASE_URL` / `NEXT_PUBLIC_API_PATH` as repository
+**variables** (Settings → Secrets and variables → Actions) so release builds
+point at your real API — the values are baked in at build time.
 
 ## Layout
 
