@@ -15,13 +15,13 @@ export interface paths {
      * List Items
      * @description List items, newest first.
      */
-    get: operations["list_items_api_v1_items_get"];
+    get: operations["items-list_items"];
     put?: never;
     /**
      * Create Item
      * @description Create a new item.
      */
-    post: operations["create_item_api_v1_items_post"];
+    post: operations["items-create_item"];
     delete?: never;
     options?: never;
     head?: never;
@@ -39,21 +39,21 @@ export interface paths {
      * Get Item
      * @description Get a single item.
      */
-    get: operations["get_item_api_v1_items__item_id__get"];
+    get: operations["items-get_item"];
     put?: never;
     post?: never;
     /**
      * Delete Item
      * @description Delete an item.
      */
-    delete: operations["delete_item_api_v1_items__item_id__delete"];
+    delete: operations["items-delete_item"];
     options?: never;
     head?: never;
     /**
      * Update Item
      * @description Partially update an item.
      */
-    patch: operations["update_item_api_v1_items__item_id__patch"];
+    patch: operations["items-update_item"];
     trace?: never;
   };
   "/health": {
@@ -67,7 +67,7 @@ export interface paths {
      * Health
      * @description Liveness probe — returns 200 when the process is serving requests.
      */
-    get: operations["health_health_get"];
+    get: operations["health-health"];
     put?: never;
     post?: never;
     delete?: never;
@@ -171,7 +171,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  list_items_api_v1_items_get: {
+  "items-list_items": {
     parameters: {
       query?: {
         offset?: number;
@@ -203,7 +203,7 @@ export interface operations {
       };
     };
   };
-  create_item_api_v1_items_post: {
+  "items-create_item": {
     parameters: {
       query?: never;
       header?: never;
@@ -236,7 +236,7 @@ export interface operations {
       };
     };
   };
-  get_item_api_v1_items__item_id__get: {
+  "items-get_item": {
     parameters: {
       query?: never;
       header?: never;
@@ -267,7 +267,7 @@ export interface operations {
       };
     };
   };
-  delete_item_api_v1_items__item_id__delete: {
+  "items-delete_item": {
     parameters: {
       query?: never;
       header?: never;
@@ -296,7 +296,7 @@ export interface operations {
       };
     };
   };
-  update_item_api_v1_items__item_id__patch: {
+  "items-update_item": {
     parameters: {
       query?: never;
       header?: never;
@@ -331,7 +331,7 @@ export interface operations {
       };
     };
   };
-  health_health_get: {
+  "health-health": {
     parameters: {
       query?: never;
       header?: never;

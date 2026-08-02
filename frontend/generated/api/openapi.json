@@ -195,7 +195,7 @@
     "/api/v1/items": {
       "get": {
         "description": "List items, newest first.",
-        "operationId": "list_items_api_v1_items_get",
+        "operationId": "items-list_items",
         "parameters": [
           {
             "in": "query",
@@ -248,7 +248,7 @@
       },
       "post": {
         "description": "Create a new item.",
-        "operationId": "create_item_api_v1_items_post",
+        "operationId": "items-create_item",
         "requestBody": {
           "content": {
             "application/json": {
@@ -288,7 +288,7 @@
     "/api/v1/items/{item_id}": {
       "delete": {
         "description": "Delete an item.",
-        "operationId": "delete_item_api_v1_items__item_id__delete",
+        "operationId": "items-delete_item",
         "parameters": [
           {
             "in": "path",
@@ -321,7 +321,7 @@
       },
       "get": {
         "description": "Get a single item.",
-        "operationId": "get_item_api_v1_items__item_id__get",
+        "operationId": "items-get_item",
         "parameters": [
           {
             "in": "path",
@@ -361,7 +361,7 @@
       },
       "patch": {
         "description": "Partially update an item.",
-        "operationId": "update_item_api_v1_items__item_id__patch",
+        "operationId": "items-update_item",
         "parameters": [
           {
             "in": "path",
@@ -413,7 +413,7 @@
     "/health": {
       "get": {
         "description": "Liveness probe \u2014 returns 200 when the process is serving requests.",
-        "operationId": "health_health_get",
+        "operationId": "health-health",
         "responses": {
           "200": {
             "content": {

@@ -43,6 +43,17 @@ gh api -X POST "repos/$REPO/rulesets" --input - >/dev/null <<'JSON' || \
 }
 JSON
 
+echo "Enabling secret scanning with push protection..."
+gh api -X PATCH "repos/$REPO" --input - >/dev/null <<'JSON' || \
+  echo "  (requires a public repo or GitHub Advanced Security — skipped)"
+{
+  "security_and_analysis": {
+    "secret_scanning": { "status": "enabled" },
+    "secret_scanning_push_protection": { "status": "enabled" }
+  }
+}
+JSON
+
 echo "Restricting default GITHUB_TOKEN permissions to read-only..."
 gh api -X PUT "repos/$REPO/actions/permissions/workflow" \
   -f default_workflow_permissions=read \
