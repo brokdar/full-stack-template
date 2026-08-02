@@ -1,4 +1,9 @@
-"""HTTP endpoints for the items domain. Thin layer over the service."""
+"""HTTP endpoints for the items domain. Thin layer over the service.
+
+NOTE: These example endpoints are unauthenticated. When you add auth, protect
+your routers with a dependency (e.g. ``Depends(get_current_user)``) — don't
+ship unauthenticated write endpoints to production.
+"""
 
 import uuid
 from typing import Annotated

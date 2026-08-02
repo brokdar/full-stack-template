@@ -8,9 +8,9 @@ enforces it.
 """
 
 from functools import lru_cache
-from typing import Literal
+from typing import Literal, Self
 
-from pydantic import BaseModel, SecretStr
+from pydantic import BaseModel, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -78,6 +78,22 @@ class Settings(BaseSettings):
     redis: RedisSettings = RedisSettings()
     auth: AuthSettings = AuthSettings()
     log: LogSettings = LogSettings()
+
+    @model_validator(mode="after")
+    def _no_insecure_defaults_in_production(self) -> Self:
+        """Refuse to boot in production with dev-convenience credentials."""
+        if self.environment != "production":
+            return self
+        problems = []
+        if not self.auth.jwt.secret_key.get_secret_value():
+            problems.append("AUTH__JWT__SECRET_KEY is empty")
+        if self.postgres.password.get_secret_value() in ("", "postgres"):
+            problems.append("POSTGRES__PASSWORD is empty or the dev default")
+        if problems:
+            raise ValueError(
+                f"Insecure production configuration: {'; '.join(problems)}"
+            )
+        return self
 
 
 @lru_cache
