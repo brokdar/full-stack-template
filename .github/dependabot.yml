@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     groups:
       github-actions:
         patterns: ["*"]
@@ -11,12 +11,15 @@ updates:
   - package-ecosystem: "devcontainers"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    groups:
+      devcontainers:
+        patterns: ["*"]
 
   - package-ecosystem: "uv"
     directory: "/backend"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     groups:
       backend-deps:
         patterns: ["*"]
@@ -28,7 +31,7 @@ updates:
   - package-ecosystem: "bun"
     directory: "/frontend"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     groups:
       frontend-deps:
         patterns: ["*"]
