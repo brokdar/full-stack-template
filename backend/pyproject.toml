@@ -5,7 +5,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dynamic = ["version"]
 dependencies = [
-    "fastapi[standard]>=0.139.0",
+    "fastapi[standard]>=0.141.1",
     "sqlalchemy[asyncio]>=2.0.51",
     "alembic>=1.18.0",
     "asyncpg>=0.31.0",
