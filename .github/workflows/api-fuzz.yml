@@ -16,6 +16,8 @@ permissions:
 jobs:
   fuzz:
     runs-on: ubuntu-latest
+    # Backstop: without this a hung fuzz step would spin for the 6h default.
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: backend
@@ -53,12 +55,43 @@ jobs:
       - name: Fuzz the API from its OpenAPI schema
         # negative_data_rejection is excluded by design: FastAPI ignores
         # unknown query parameters, which that check treats as a failure.
-        run: >
-          uvx schemathesis run http://localhost:8000/openapi.json
-          --max-examples 100
-          --exclude-checks negative_data_rejection
-          --report junit
-          --report-dir schemathesis-report
+        #
+        # schemathesis runs unpinned via `uvx` (floats to the latest release),
+        # and current versions intermittently hang on exit AFTER finishing
+        # every check: the CLI prints its summary and writes the JUnit report,
+        # but the process never returns. Bound it with `timeout`; if that
+        # teardown hang trips the guard, trust the JUnit report (already on
+        # disk) for the verdict instead of letting the job hang.
+        run: |
+          set +e
+          timeout --signal=INT --kill-after=30s 8m \
+            uvx schemathesis run http://localhost:8000/openapi.json \
+              --max-examples 100 \
+              --exclude-checks negative_data_rejection \
+              --report junit \
+              --report-dir schemathesis-report
+          st=$?
+          set -e
+
+          # A normal exit is authoritative: 0 = all checks passed, any other
+          # value below the timeout codes = real findings. Use it directly.
+          if [ "$st" -ne 124 ] && [ "$st" -ne 130 ] && [ "$st" -ne 137 ]; then
+            exit "$st"
+          fi
+
+          # 124/130/137 = the timeout guard fired on the teardown hang. The run
+          # itself completed, so fall back to the JUnit report for the verdict.
+          echo "::warning::schemathesis did not exit within the time limit (status $st); consulting the JUnit report."
+          if ! ls schemathesis-report/*.xml >/dev/null 2>&1; then
+            echo "::error::schemathesis hung before writing its JUnit report"
+            exit 1
+          fi
+          bad=$(grep -ohE '(failures|errors)="[0-9]+"' schemathesis-report/*.xml | grep -cvE '="0"' || true)
+          if [ "${bad:-0}" -ne 0 ]; then
+            echo "::error::schemathesis reported failures/errors"
+            exit 1
+          fi
+          echo "schemathesis completed all checks cleanly but hung on exit; treating as pass."
 
       - name: Upload report on failure
         if: failure()
